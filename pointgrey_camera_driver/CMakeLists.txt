@@ -14,7 +14,7 @@ generate_dynamic_reconfigure_options(cfg/PointGrey.cfg)
 catkin_package(INCLUDE_DIRS include LIBRARIES PointGreyCamera PointGreyCameraNodelet PointGreyStereoCameraNodelet CATKIN_DEPENDS roscpp nodelet sensor_msgs wfov_camera_msgs image_exposure_msgs camera_info_manager dynamic_reconfigure image_transport driver_base diagnostic_updater message_runtime DEPENDS system_lib FlyCapture2)
 
 ## Setup include paths
-include_directories(include cfg ${catkin_INCLUDE_DIRS} ${FLYCAPTURE2_INCLUDE_DIRS})
+include_directories(include cfg/cpp ${catkin_INCLUDE_DIRS} ${FLYCAPTURE2_INCLUDE_DIRS})
 
 ## Only build driver if we have the FlyCapture SDK
 if(FLYCAPTURE2_FOUND)
