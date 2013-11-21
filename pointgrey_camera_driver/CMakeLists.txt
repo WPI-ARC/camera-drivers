@@ -11,7 +11,7 @@ find_package(FlyCapture2)
 generate_dynamic_reconfigure_options(cfg/PointGrey.cfg)
 
 ## Catkin package
-catkin_package(INCLUDE_DIRS include LIBRARIES PointGreyCamera PointGreyCameraNodelet PointGreyStereoCameraNodelet CATKIN_DEPENDS roscpp nodelet sensor_msgs wfov_camera_msgs image_exposure_msgs camera_info_manager dynamic_reconfigure image_transport driver_base diagnostic_updater message_runtime DEPENDS system_lib)
+catkin_package(INCLUDE_DIRS include LIBRARIES PointGreyCamera PointGreyCameraNodelet PointGreyStereoCameraNodelet CATKIN_DEPENDS roscpp nodelet sensor_msgs wfov_camera_msgs image_exposure_msgs camera_info_manager dynamic_reconfigure image_transport driver_base diagnostic_updater message_runtime DEPENDS system_lib FlyCapture2)
 
 ## Setup include paths
 include_directories(include ${catkin_INCLUDE_DIRS} ${FLYCAPTURE2_INCLUDE_DIRS})
@@ -23,28 +23,28 @@ if(FLYCAPTURE2_FOUND)
   # Camera access library
   add_library(PointGreyCamera src/PointGreyCamera.cpp)
   target_link_libraries(PointGreyCamera ${catkin_LIBRARIES} ${FLYCAPTURE2_LIBRARIES})
-  add_dependencies(PointGreyCamera ${catkin_EXPORTED_TARGETS})
+  add_dependencies(PointGreyCamera ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
   # Mono nodelet library
   add_library(PointGreyCameraNodelet src/nodelet.cpp)
   target_link_libraries(PointGreyCameraNodelet PointGreyCamera ${catkin_LIBRARIES})
-  add_dependencies(PointGreyCameraNodelet ${catkin_EXPORTED_TARGETS})
+  add_dependencies(PointGreyCameraNodelet ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
   # Stereo nodelet library
   add_library(PointGreyStereoCameraNodelet src/stereo_nodelet.cpp)
   target_link_libraries(PointGreyStereoCameraNodelet PointGreyCamera ${catkin_LIBRARIES})
-  add_dependencies(PointGreyStereoCameraNodelet ${catkin_EXPORTED_TARGETS})
+  add_dependencies(PointGreyStereoCameraNodelet ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
   ## Build executables
   # Mono node executable
   add_executable(pointgrey_camera_node src/node.cpp)
   target_link_libraries(pointgrey_camera_node ${catkin_LIBRARIES})
-  add_dependencies(pointgrey_camera_node ${catkin_EXPORTED_TARGETS})
+  add_dependencies(pointgrey_camera_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
   # Stereo node executable
   add_executable(pointgrey_stereo_node src/stereo_node.cpp)
   target_link_libraries(pointgrey_stereo_node ${catkin_LIBRARIES})
-  add_dependencies(pointgrey_stereo_node ${catkin_EXPORTED_TARGETS})
+  add_dependencies(pointgrey_stereo_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
   # Camera list executable
   add_library(list_cameras src/list_cameras.cpp)
   target_link_libraries(list_cameras PointGreyCamera ${catkin_LIBRARIES})
-  add_dependencies(list_cameras ${catkin_EXPORTED_TARGETS})
+  add_dependencies(list_cameras ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
   ## Mark libraries for installation
   install(TARGETS PointGreyCamera PointGreyCameraNodelet PointGreyStereoCameraNodelet
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
