@@ -42,7 +42,7 @@ if(FLYCAPTURE2_FOUND)
   target_link_libraries(pointgrey_stereo_node ${catkin_LIBRARIES})
   add_dependencies(pointgrey_stereo_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
   # Camera list executable
-  add_library(list_cameras src/list_cameras.cpp)
+  add_executable(list_cameras src/list_cameras.cpp)
   target_link_libraries(list_cameras PointGreyCamera ${catkin_LIBRARIES})
   add_dependencies(list_cameras ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
   ## Mark libraries for installation
