@@ -7,34 +7,41 @@
 #   FLYCAPTURE2_LIBRARIES
 #
 
-include(FindPkgConfig)
-include(FindPackageHandleStandardArgs)
 
-# Use pkg-config to get hints about paths
-pkg_check_modules(FLYCAPTURE2_PKGCONF REQUIRED)
+INCLUDE(FindPackageHandleStandardArgs)
+INCLUDE(HandleLibraryTypes)
 
-# Include dir
-find_path(FLYCAPTURE2_INCLUDE_DIR
-  NAMES flycapture/FlyCapture2.h
-  PATHS ${FLYCAPTURE2_PKGCONF_INCLUDE_DIRS}
+SET(FlyCapture_IncludeSearchPaths
+  /usr/include/flycapture/
 )
 
-# Finally the library itself
-find_library(FLYCAPTURE2_LIBRARY
+SET(FlyCapture_LibrarySearchPaths
+  /usr/lib/
+)
+
+FIND_PATH(FLYCAPTURE2_INCLUDE_DIRS FlyCapture2.h
+  PATHS ${FlyCapture_IncludeSearchPaths}
+)
+FIND_LIBRARY(FLYCAPTURE2_LIBRARIES
   NAMES flycapture
-  PATHS ${FLYCAPTURE2_PKGCONF_LIBRARY_DIRS}
+  PATHS ${FlyCapture_LibrarySearchPaths}
 )
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(FlyCapture2 DEFAULT_MSG FlyCapture2_LIBRARY FlyCapture2_INCLUDE_DIR)
+# Handle the REQUIRED argument and set the <UPPERCASED_NAME>_FOUND variable
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(FlyCapture2 "Could NOT find Flycapture2. Only required for testing purposes. Please continue."
+  FLYCAPTURE2_LIBRARIES
+  FLYCAPTURE2_INCLUDE_DIRS
+)
 
+IF(FLYCAPTURE2_FOUND)
+  FIND_PACKAGE_MESSAGE(FLYCAPTURE2_FOUND "Found Fly Capture SDK  ${FLYCAPTURE2_LIBRARIES}" "[${FLYCAPTURE2_LIBRARIES}][${FLYCAPTURE2_INCLUDE_DIRS}]")
+ENDIF(FLYCAPTURE2_FOUND)
 
-if(FLYCAPTURE2_PKGCONF_FOUND)
-  set(FLYCAPTURE2_LIBRARIES ${FLYCAPTURE2_LIBRARY} ${FLYCAPTURE2_PKGCONF_LIBRARIES})
-  set(FLYCAPTURE2_INCLUDE_DIRS ${FLYCAPTURE2_INCLUDE_DIR} ${FLYCAPTURE2_PKGCONF_INCLUDE_DIRS})
-  set(FLYCAPTURE2_FOUND yes)
-else()
-  set(FLYCAPTURE2_LIBRARIES)
-  set(FLYCAPTURE2_INCLUDE_DIRS)
-  set(FLYCAPTURE2_FOUND no)
-endif()
+# Collect optimized and debug libraries
+HANDLE_LIBRARY_TYPES(FLYCAPTURE2)
+
+MARK_AS_ADVANCED(
+  FLYCAPTURE2_INCLUDE_DIRS
+  FLYCAPTURE2_LIBRARIES
+)
 
