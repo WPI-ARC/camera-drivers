@@ -9,7 +9,6 @@
 
 
 INCLUDE(FindPackageHandleStandardArgs)
-INCLUDE(HandleLibraryTypes)
 
 SET(FlyCapture_IncludeSearchPaths
   /usr/include/flycapture/
@@ -36,9 +35,6 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(FlyCapture2 "Could NOT find Flycapture2. Only 
 IF(FLYCAPTURE2_FOUND)
   FIND_PACKAGE_MESSAGE(FLYCAPTURE2_FOUND "Found Fly Capture SDK  ${FLYCAPTURE2_LIBRARIES}" "[${FLYCAPTURE2_LIBRARIES}][${FLYCAPTURE2_INCLUDE_DIRS}]")
 ENDIF(FLYCAPTURE2_FOUND)
-
-# Collect optimized and debug libraries
-HANDLE_LIBRARY_TYPES(FLYCAPTURE2)
 
 MARK_AS_ADVANCED(
   FLYCAPTURE2_INCLUDE_DIRS
