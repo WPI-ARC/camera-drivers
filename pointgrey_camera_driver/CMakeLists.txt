@@ -1,64 +1,79 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(pointgrey_camera_driver)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE RelWithDebInfo)
+find_package(catkin REQUIRED roscpp nodelet sensor_msgs wfov_camera_msgs image_exposure_msgs camera_info_manager dynamic_reconfigure image_transport driver_base diagnostic_updater message_generation)
 
-rosbuild_init()
-
-#uncomment if you have defined messages
-#rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
-
-# add dynamic reconfigure api
-rosbuild_find_ros_package(dynamic_reconfigure)
-include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
-gencfg()
-
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-
+# Find FlyCapture (HOW?!) - make a new CMake file
 # Find the flycapture2 library from Point Grey
-include_directories("/usr/include/flycapture")
-find_library(FLYCAPTURE2 flycapture)
+# include_directories("/usr/include/flycapture")
+# find_library(FLYCAPTURE2 flycapture)
 
-if(FLYCAPTURE2)
-  # Link flycapture to pointgrey
-  rosbuild_add_library(PointGreyCamera src/PointGreyCamera.cpp)
-  target_link_libraries(PointGreyCamera ${FLYCAPTURE2})
+## Find FlyCapture2
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
+find_package(FlyCapture2)
 
-  # Link pointgrey to the nodelets
-  rosbuild_add_library(PointGreyCameraNodelet src/nodelet.cpp)
-  target_link_libraries(PointGreyCameraNodelet PointGreyCamera)
+## Generate dynamic reconfigure files
+generate_dynamic_reconfigure_options(cfg/PointGrey.cfg)
 
-  rosbuild_add_library(PointGreyStereoCameraNodelet src/stereo_nodelet.cpp)
-  target_link_libraries(PointGreyStereoCameraNodelet PointGreyCamera)
 
-  # Make the standalone nodes
-  rosbuild_add_executable(pointgrey_camera_node src/node.cpp)
 
-  rosbuild_add_executable(pointgrey_stereo_node src/stereo_node.cpp)
+# Only build driver if we have the FlyCapture SDK
+if("${FLYCAPTURE2_FOUND}" STREQUAL "")
+  message(WARNING "FlyCapture2 SDK not found. PointGrey camera driver will not be built.")
 
-  # Make the list cameras tool
-  rosbuild_add_executable(list_cameras src/list_cameras.cpp)
-  target_link_libraries(list_cameras PointGreyCamera)
-  
-else(FLYCAPTURE2)
-  message(FATAL_ERROR "FlyCapture2 is needed for the Point Grey cameras.  Cannot continue.")
-endif(FLYCAPTURE2)
+  catkin_package(INCLUDE_DIRS include LIBRARIES PointGreyCamera PointGreyCameraNodelet PointGreyStereoCameraNodelet CATKIN_DEPENDS roscpp nodelet sensor_msgs wfov_camera_msgs image_exposure_msgs camera_info_manager dynamic_reconfigure image_transport driver_base diagnostic_updater message_runtime DEPENDS system_lib)
+else()
+  if(${FLYCAPTURE2_FOUND} GREATER 0)
+    message(STATUS "FlyCapture2 SDK found. Building PointGrey camera driver.")
 
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
+    catkin_package(INCLUDE_DIRS include LIBRARIES PointGreyCamera PointGreyCameraNodelet PointGreyStereoCameraNodelet CATKIN_DEPENDS roscpp nodelet sensor_msgs wfov_camera_msgs image_exposure_msgs camera_info_manager dynamic_reconfigure image_transport driver_base diagnostic_updater message_runtime DEPENDS system_lib FlyCapture2)
+
+    include_directories(include ${catkin_INCLUDE_DIRS} ${FLYCAPTURE2_INCLUDE_DIRS})
+
+    ## Build libraries
+    add_library(PointGreyCamera src/PointGreyCamera.cpp)
+    target_link_libraries(PointGreyCamera ${catkin_LIBRARIES} ${FLYCAPTURE2_LIBRARIES})
+    add_dependencies(PointGreyCamera ${catkin_EXPORTED_TARGETS})
+
+    add_library(PointGreyCameraNodelet src/nodelet.cpp)
+    target_link_libraries(PointGreyCameraNodelet PointGreyCamera ${catkin_LIBRARIES})
+    add_dependencies(PointGreyCameraNodelet ${catkin_EXPORTED_TARGETS})
+
+    add_library(PointGreyStereoCameraNodelet src/stereo_nodelet.cpp)
+    target_link_libraries(PointGreyStereoCameraNodelet PointGreyCamera ${catkin_LIBRARIES})
+    add_dependencies(PointGreyStereoCameraNodelet ${catkin_EXPORTED_TARGETS})
+
+    ## Build executables
+    add_executable(pointgrey_camera_node src/node.cpp)
+    target_link_libraries(pointgrey_camera_node ${catkin_LIBRARIES})
+    add_dependencies(pointgrey_camera_node ${catkin_EXPORTED_TARGETS})
+
+    add_executable(pointgrey_stereo_node src/stereo_node.cpp)
+    target_link_libraries(pointgrey_stereo_node ${catkin_LIBRARIES})
+    add_dependencies(pointgrey_stereo_node ${catkin_EXPORTED_TARGETS})
+
+    add_library(list_cameras src/list_cameras.cpp)
+    target_link_libraries(list_cameras PointGreyCamera ${catkin_LIBRARIES})
+    add_dependencies(list_cameras ${catkin_EXPORTED_TARGETS})
+
+    ## Mark library for installation
+    install(TARGETS PointGreyCamera PointGreyCameraNodelet PointGreyStereoCameraNodelet
+      ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+      LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+      RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    )
+
+    ## Mark cpp header files for installation
+    install(DIRECTORY include/${PROJECT_NAME}/
+      DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+      PATTERN ".svn" EXCLUDE
+    )
+
+    ## Add nodelet XML file
+    install(FILES pointgreycamera_nodelet.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+  else()
+    message(WARNING "FlyCapture2 SDK not found. PointGrey camera driver will not be built.")
+    catkin_package(INCLUDE_DIRS include LIBRARIES PointGreyCamera PointGreyCameraNodelet PointGreyStereoCameraNodelet CATKIN_DEPENDS roscpp nodelet sensor_msgs wfov_camera_msgs image_exposure_msgs camera_info_manager dynamic_reconfigure image_transport driver_base diagnostic_updater message_runtime DEPENDS system_lib)
+  endif()
+endif()
+
