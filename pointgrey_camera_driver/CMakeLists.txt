@@ -19,7 +19,9 @@ generate_dynamic_reconfigure_options(cfg/PointGrey.cfg)
 catkin_package(INCLUDE_DIRS include LIBRARIES PointGreyCamera PointGreyCameraNodelet PointGreyStereoCameraNodelet CATKIN_DEPENDS roscpp nodelet sensor_msgs wfov_camera_msgs image_exposure_msgs camera_info_manager dynamic_reconfigure image_transport driver_base diagnostic_updater message_runtime DEPENDS system_lib)
 
 ## Check if the system has FlyCap installed
-include_directories(include ${catkin_INCLUDE_DIRS} "/usr/include/flycapture")
+set(FLYCAPTURE2_INCLUDE_DIRS "/usr/include/flycapture")
+include_directories(include ${catkin_INCLUDE_DIRS} ${FLYCAPTURE2_INCLUDE_DIRS})
+message(STATUS "INCLUDE_DIRECTORIES" ${include_directories})
 unset(HAVE_FLYCAPTURE2_H CACHE)
 check_include_files(FlyCapture2.h HAVE_FLYCAPTURE2_H)
 find_library(FLYCAPTURE2_LIBRARIES flycapture)
