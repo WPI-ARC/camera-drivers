@@ -32,13 +32,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <nodelet/loader.h>
 
 int main(int argc, char **argv){
-  ros::init(argc, argv, "pointgrey_stereo_camera_node");
+  ros::init(argc, argv, "wfov_pointgrey_stereo_camera_node");
   
   // This is code based nodelet loading, the preferred nodelet launching is done through roslaunch
   nodelet::Loader nodelet;
   nodelet::M_string remap(ros::names::getRemappings());
   nodelet::V_string nargv;
-  nodelet.load("pointgrey_stereo_camera_node", "pointgrey_camera_driver/PointGreyStereoCameraNodelet", remap, nargv);
+  nodelet.load("wfov_pointgrey_camera_node", "pointgrey_camera_driver/PointGreyWFOVStereoCameraNodelet", remap, nargv);
   
   ros::spin();
 

@@ -37,7 +37,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include <image_transport/image_transport.h> // ROS library that allows sending compressed images
 #include <camera_info_manager/camera_info_manager.h> // ROS library that publishes CameraInfo topics
-#include <sensor_msgs/Image.h> // ROS message header for images
 #include <sensor_msgs/CameraInfo.h> // ROS message header for CameraInfo
 
 #include <wfov_camera_msgs/WFOVImage.h>
@@ -52,12 +51,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 namespace pointgrey_camera_driver{
 
-class PointGreyCameraNodelet: public nodelet::Nodelet
+class PointGreyWFOVCameraNodelet: public nodelet::Nodelet
 {
 public:
-  PointGreyCameraNodelet(){}
+  PointGreyWFOVCameraNodelet(){}
 
-  ~PointGreyCameraNodelet(){
+  ~PointGreyWFOVCameraNodelet(){
     if(pubThread_){
       pubThread_->interrupt();
       pubThread_->join();
@@ -171,7 +170,7 @@ private:
       }
 
       // Subscribe to gain and white balance changes
-      sub_ = getMTNodeHandle().subscribe("image_exposure_sequence", 10, &pointgrey_camera_driver::PointGreyCameraNodelet::gainWBCallback, this);
+      sub_ = getMTNodeHandle().subscribe("image_exposure_sequence", 10, &pointgrey_camera_driver::PointGreyWFOVCameraNodelet::gainWBCallback, this);
       
       volatile bool started = false;
       while(!started && ros::ok()){
@@ -186,7 +185,7 @@ private:
       }
       
       // Start the thread to loop through and publish messages
-      pubThread_.reset(new boost::thread(boost::bind(&pointgrey_camera_driver::PointGreyCameraNodelet::devicePoll, this)));
+      pubThread_.reset(new boost::thread(boost::bind(&pointgrey_camera_driver::PointGreyWFOVCameraNodelet::devicePoll, this)));
     } else {
       NODELET_DEBUG("Do nothing in callback.");
     }
@@ -218,7 +217,7 @@ private:
     
     // Start up the dynamic_reconfigure service, note that this needs to stick around after this function ends
     srv_ = boost::make_shared <dynamic_reconfigure::Server<pointgrey_camera_driver::PointGreyConfig> > (pnh);
-    dynamic_reconfigure::Server<pointgrey_camera_driver::PointGreyConfig>::CallbackType f =  boost::bind(&pointgrey_camera_driver::PointGreyCameraNodelet::paramCallback, this, _1, _2);
+    dynamic_reconfigure::Server<pointgrey_camera_driver::PointGreyConfig>::CallbackType f =  boost::bind(&pointgrey_camera_driver::PointGreyWFOVCameraNodelet::paramCallback, this, _1, _2);
     srv_->setCallback (f);
     
     // Start the camera info manager and attempt to load any configurations
@@ -228,7 +227,7 @@ private:
     
     // Publish topics using ImageTransport through camera_info_manager (gives cool things like compression)
     it_.reset(new image_transport::ImageTransport(nh));
-    image_transport::SubscriberStatusCallback cb = boost::bind(&PointGreyCameraNodelet::connectCb, this);
+    image_transport::SubscriberStatusCallback cb = boost::bind(&PointGreyWFOVCameraNodelet::connectCb, this);
     it_pub_ = it_->advertiseCamera("image_raw", 5, cb, cb);
     
     // Set up diagnostics
@@ -247,7 +246,7 @@ private:
     pnh.param<double>("min_acceptable_delay", min_acceptable, 0.0);
     double max_acceptable; // The maximum publishing delay (in seconds) before warning.
     pnh.param<double>("max_acceptable_delay", max_acceptable, 0.2);
-    ros::SubscriberStatusCallback cb2 = boost::bind(&PointGreyCameraNodelet::connectCb, this);
+    ros::SubscriberStatusCallback cb2 = boost::bind(&PointGreyWFOVCameraNodelet::connectCb, this);
     pub_.reset(new diagnostic_updater::DiagnosedPublisher<wfov_camera_msgs::WFOVImage>(nh.advertise<wfov_camera_msgs::WFOVImage>("image", 5, cb2, cb2),
 											      updater_,
 											      diagnostic_updater::FrequencyStatusParam(&min_freq_, &max_freq_, freq_tolerance, window_size),
@@ -374,5 +373,5 @@ private:
   bool do_rectify_; ///< Whether or not to rectify as if part of an image.  Set to false if whole image, and true if in ROI mode.
 };
 
-PLUGINLIB_DECLARE_CLASS(pointgrey_camera_driver, PointGreyCameraNodelet, pointgrey_camera_driver::PointGreyCameraNodelet, nodelet::Nodelet);  // Needed for Nodelet declaration
+PLUGINLIB_DECLARE_CLASS(pointgrey_camera_driver, PointGreyWFOVCameraNodelet, pointgrey_camera_driver::PointGreyWFOVCameraNodelet, nodelet::Nodelet);  // Needed for Nodelet declaration
 }

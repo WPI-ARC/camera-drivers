@@ -16,14 +16,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */ 
 
 
-
 /**
-   @file stereo_node.cpp
+   @file node.cpp
    @author Chad Rockey
-   @date March 20, 2012
+   @date July 13, 2011
    @brief ROS node to wrap the nodelet for standalone rosrun execution
    
-   @attention Copyright (C) 2012
+   @attention Copyright (C) 2011
    @attention National Robotics Engineering Center
    @attention Carnegie Mellon University
 */
@@ -32,13 +31,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <nodelet/loader.h>
 
 int main(int argc, char **argv){
-  ros::init(argc, argv, "pointgrey_stereo_camera_node");
+  ros::init(argc, argv, "wfov_pointgrey_camera_node");
   
   // This is code based nodelet loading, the preferred nodelet launching is done through roslaunch
   nodelet::Loader nodelet;
   nodelet::M_string remap(ros::names::getRemappings());
   nodelet::V_string nargv;
-  nodelet.load("pointgrey_stereo_camera_node", "pointgrey_camera_driver/PointGreyStereoCameraNodelet", remap, nargv);
+  nodelet.load("wfov_pointgrey_camera_node", "pointgrey_camera_driver/PointGreyWFOVCameraNodelet", remap, nargv);
   
   ros::spin();
 
