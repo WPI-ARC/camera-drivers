@@ -9,15 +9,3 @@
     <description>This is the nodelet for the Point Gray Stereo Camera Driver.</description>
   </class>
 </library>
-
-<library path="lib/libPointGreyWFOVCameraNodelet">
-  <class name="pointgrey_camera_driver/PointGreyWFOVCameraNodelet" type="pointgrey_camera_driver::PointGreyWFOVCameraNodelet" base_class_type="nodelet::Nodelet">
-    <description>This is the wide field of view nodelet for the Point Gray Camera Driver.</description>
-  </class>
-</library>
-
-<library path="lib/libPointGreyWFOVStereoCameraNodelet">
-  <class name="pointgrey_camera_driver/PointGreyWFOVStereoCameraNodelet" type="pointgrey_camera_driver::PointGreyWFOVStereoCameraNodelet" base_class_type="nodelet::Nodelet">
-    <description>This is the wide field of view nodelet for the Point Gray Stereo Camera Driver.</description>
-  </class>
-</library>
