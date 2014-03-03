@@ -14,7 +14,7 @@ generate_dynamic_reconfigure_options(cfg/PointGrey.cfg)
 catkin_package(INCLUDE_DIRS include LIBRARIES PointGreyCamera PointGreyCameraNodelet PointGreyStereoCameraNodelet CATKIN_DEPENDS roscpp nodelet sensor_msgs wfov_camera_msgs image_exposure_msgs camera_info_manager dynamic_reconfigure image_transport driver_base diagnostic_updater message_runtime DEPENDS system_lib FlyCapture2)
 
 ## Setup include paths
-include_directories(include cfg/cpp ${catkin_INCLUDE_DIRS} ${FLYCAPTURE2_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${FLYCAPTURE2_INCLUDE_DIRS})
 
 ## Only build driver if we have the FlyCapture SDK
 if(FLYCAPTURE2_FOUND)
@@ -23,44 +23,28 @@ if(FLYCAPTURE2_FOUND)
   # Camera access library
   add_library(PointGreyCamera src/PointGreyCamera.cpp)
   target_link_libraries(PointGreyCamera ${catkin_LIBRARIES} ${FLYCAPTURE2_LIBRARIES})
-  add_dependencies(PointGreyCamera ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+  add_dependencies(PointGreyCamera ${catkin_EXPORTED_TARGETS} ${pointgrey_camera_driver_EXPORTED_TARGETS})
   # Mono nodelet library
   add_library(PointGreyCameraNodelet src/nodelet.cpp)
   target_link_libraries(PointGreyCameraNodelet PointGreyCamera ${catkin_LIBRARIES})
-  add_dependencies(PointGreyCameraNodelet ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
-  # Mono nodelet library (wide field-of-view)
-  add_library(PointGreyWFOVCameraNodelet src/wfov_nodelet.cpp)
-  target_link_libraries(PointGreyWFOVCameraNodelet PointGreyCamera ${catkin_LIBRARIES})
-  add_dependencies(PointGreyWFOVCameraNodelet ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+  add_dependencies(PointGreyCameraNodelet ${catkin_EXPORTED_TARGETS} ${pointgrey_camera_driver_EXPORTED_TARGETS})
   # Stereo nodelet library
   add_library(PointGreyStereoCameraNodelet src/stereo_nodelet.cpp)
   target_link_libraries(PointGreyStereoCameraNodelet PointGreyCamera ${catkin_LIBRARIES})
-  add_dependencies(PointGreyStereoCameraNodelet ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
-  # Stereo nodelet library (wide field-of-view)
-  add_library(PointGreyWFOVStereoCameraNodelet src/wfov_stereo_nodelet.cpp)
-  target_link_libraries(PointGreyWFOVStereoCameraNodelet PointGreyCamera ${catkin_LIBRARIES})
-  add_dependencies(PointGreyWFOVStereoCameraNodelet ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+  add_dependencies(PointGreyStereoCameraNodelet ${catkin_EXPORTED_TARGETS} ${pointgrey_camera_driver_EXPORTED_TARGETS})
   ## Build executables
   # Mono node executable
   add_executable(pointgrey_camera_node src/node.cpp)
   target_link_libraries(pointgrey_camera_node ${catkin_LIBRARIES})
-  add_dependencies(pointgrey_camera_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
-  # Mono node executable (wide field-of-view)
-  add_executable(wfov_pointgrey_camera_node src/wfov_node.cpp)
-  target_link_libraries(wfov_pointgrey_camera_node ${catkin_LIBRARIES})
-  add_dependencies(wfov_pointgrey_camera_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+  add_dependencies(pointgrey_camera_node ${catkin_EXPORTED_TARGETS} ${pointgrey_camera_driver_EXPORTED_TARGETS})
   # Stereo node executable
   add_executable(pointgrey_stereo_node src/stereo_node.cpp)
   target_link_libraries(pointgrey_stereo_node ${catkin_LIBRARIES})
-  add_dependencies(pointgrey_stereo_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
-  # Stereo node executable (wide field-of-view)
-  add_executable(wfov_pointgrey_stereo_node src/wfov_stereo_node.cpp)
-  target_link_libraries(wfov_pointgrey_stereo_node ${catkin_LIBRARIES})
-  add_dependencies(wfov_pointgrey_stereo_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+  add_dependencies(pointgrey_stereo_node ${catkin_EXPORTED_TARGETS} ${pointgrey_camera_driver_EXPORTED_TARGETS})
   # Camera list executable
   add_executable(list_cameras src/list_cameras.cpp)
   target_link_libraries(list_cameras PointGreyCamera ${catkin_LIBRARIES})
-  add_dependencies(list_cameras ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+  add_dependencies(list_cameras ${catkin_EXPORTED_TARGETS} ${pointgrey_camera_driver_EXPORTED_TARGETS})
   ## Mark libraries for installation
   install(TARGETS PointGreyCamera PointGreyCameraNodelet PointGreyStereoCameraNodelet
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
